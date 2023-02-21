@@ -2,4 +2,4 @@
 # Instalation Process:
 1: Download Complete folder
 2: Unzip it
-3: Run "Composer Insntall" on root folder
+3: Run "Composer Install" on root folder
