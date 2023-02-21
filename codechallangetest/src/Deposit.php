@@ -58,12 +58,3 @@ class Deposit extends Messages
     }
     
 }
-/*
-
-$bankTransation = new Deposit();
-echo $bankTransation->depositAmount('',"Nafees",5001, "REVIEWING", "REVIEWING");
-echo $bankTransation->depositAmount(6086000100057336,"Nafees",-11, "REVIEWING");
-$bankTransation->depositAmount(6086000100057337,"Sweta",300,  "INVESTMENT", "INDIVISUAL");
-$bankTransation->depositAmount(6086000100057337,"Sweta",400,  "INVESTMENT", "INDIVISUAL");
-$bankTransation->depositAmount(6086000100057338,"Naziya",1000, "INVESTMENT", "CORPORATE");*/
-
