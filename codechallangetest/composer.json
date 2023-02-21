@@ -1,0 +1,17 @@
+{
+    "name": "dell/codechallangetest",
+    "require": {
+        "phpunit/phpunit": "^9.6"
+    },
+    
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+ 
+    "authors": [
+        {
+            "name": "nafees",
+            "email": "ansari.nafees96@gmail.com"
+        }
+    ]
+}
