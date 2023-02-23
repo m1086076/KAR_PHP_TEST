@@ -1,38 +1,26 @@
 <?php
-require_once(dirname(__DIR__)."/config/configs.php"); 
+require_once(dirname(__DIR__)."/classes/banking.php");  
 require_once(dirname(__DIR__)."/classes/messages.php"); 
 
 class Withdrawal extends Messages
 {
-    public $bankName;
-    public $account_type_invt;
-    public $account_type_rev;
-    public $account_type_indv;
-    public $account_type_corp;
-    public $withdrawalLimit;
     private static $accountDetails = array();
-    
     
     function __construct()
     {
-        $this->bankName = BANK;
-        $this->account_type_invt = ACOUNT_TYPE_INVT;
-        $this->account_type_rev = ACOUNT_TYPE_REV;
-        $this->account_type_indv = ACOUNT_TYPE_INDV;
-        $this->account_type_corp = ACOUNT_TYPE_CORP;
-        $this->withdrawalLimit = WITHDRAWLIMIT;
+        $this->bankDetails = new Banking();
         $this->msg = new Messages();
     }
 
     public function withdrawAmount($withdrawalAccount, $accountHolderName,$accountBalance,$withdrawAmount, $accountType, $investmentAccType="NO")
     {
        
-        if(empty($withdrawalAccount) || empty($accountHolderName) || ($accountType!=$this->account_type_rev 
-        && $accountType!=$this->account_type_invt)){
+        if(empty($withdrawalAccount) || empty($accountHolderName) || ($accountType!=$this->bankDetails->account_type_rev 
+        && $accountType!=$this->bankDetails->account_type_invt)){
             return $this->msg->showMessage("InvalidAccount"); 
         }
-        if($accountType==$this->account_type_invt && ($this->account_type_indv!=$investmentAccType 
-        && $this->account_type_corp!=$investmentAccType)){
+        if($accountType==$this->bankDetails->account_type_invt && ($this->bankDetails->account_type_indv!=$investmentAccType 
+        && $this->bankDetails->account_type_corp!=$investmentAccType)){
             return $this->msg->showMessage("InvalidAccTypeInv"); 
         }
         if(!is_numeric($withdrawAmount) || $withdrawAmount <= 0){
@@ -44,7 +32,7 @@ class Withdrawal extends Messages
         if($accountBalance<$withdrawAmount){
             return $this->msg->showMessage("insufficientFund"); 
         }
-        if($investmentAccType==$this->account_type_indv &&  $withdrawAmount>$this->withdrawalLimit){
+        if($investmentAccType==$this->bankDetails->account_type_indv &&  $withdrawAmount>$this->bankDetails->withdrawalLimit){
             return $this->msg->showMessage("IndivisualAccLimit"); 
         }
         
@@ -54,7 +42,7 @@ class Withdrawal extends Messages
             self::$accountDetails[$withdrawalAccount]['balance'] = $accountBalance ?? 1000 ;
             self::$accountDetails[$withdrawalAccount]['accountType'] = $accountType;
             self::$accountDetails[$withdrawalAccount]['investmentAccountType'] = $investmentAccType;
-            self::$accountDetails[$withdrawalAccount]['bank'] =  $this->bankName ?? 'HDFC Bank';
+            self::$accountDetails[$withdrawalAccount]['bank'] =  $this->bankDetails->bankName ?? 'HDFC Bank';
         }
         if(self::$accountDetails[$withdrawalAccount]['balance']<$withdrawAmount){
             return $this->msg->showMessage("insufficientFund"); 

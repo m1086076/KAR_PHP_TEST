@@ -1,38 +1,26 @@
 <?php
-require_once(dirname(__DIR__)."/config/configs.php"); 
+require_once(dirname(__DIR__)."/classes/banking.php"); 
 require_once(dirname(__DIR__)."/classes/messages.php"); 
 
 class Deposit extends Messages
-{
-    public $bankName;
-    public $account_type_invt;
-    public $account_type_rev;
-    public $account_type_indv;
-    public $account_type_corp;
-    
+{   
     private static $accountDetails = array();
-    
     
     function __construct()
     {
-        $this->bankName = BANK;
-        $this->account_type_invt = ACOUNT_TYPE_INVT;
-        $this->account_type_rev = ACOUNT_TYPE_REV;
-        $this->account_type_indv = ACOUNT_TYPE_INDV;
-        $this->account_type_corp = ACOUNT_TYPE_CORP;
-        
+        $this->bankDetails = new Banking();
         $this->msg = new Messages();
     }
 
     public function depositAmount($depositAccount, $accountHolderName, $depositAmount, $accountType, $investmentAccType="NO")
     {
        
-        if(empty($depositAccount) || empty($accountHolderName) || ($accountType!=$this->account_type_rev 
-        && $accountType!=$this->account_type_invt)){
+        if(empty($depositAccount) || empty($accountHolderName) || ($accountType!=$this->bankDetails->account_type_rev 
+        && $accountType!=$this->bankDetails->account_type_invt)){
             return $this->msg->showMessage("InvalidAccount"); 
         }
-        if($accountType==$this->account_type_invt && ($this->account_type_indv!=$investmentAccType 
-        && $this->account_type_corp!=$investmentAccType)){
+        if($accountType==$this->bankDetails->account_type_invt && ($this->account_type_indv!=$investmentAccType 
+        && $this->bankDetails->account_type_corp!=$investmentAccType)){
             return $this->msg->showMessage("InvalidAccTypeInv"); 
         }
         if(!is_numeric($depositAmount) || $depositAmount <= 0){
@@ -43,7 +31,7 @@ class Deposit extends Messages
             self::$accountDetails[$depositAccount]['balance'] = 0 ;
             self::$accountDetails[$depositAccount]['accountType'] = $accountType;
             self::$accountDetails[$depositAccount]['investmentAccountType'] = $investmentAccType;
-            self::$accountDetails[$depositAccount]['bank'] =  $this->bankName ?? 'HDFC Bank';
+            self::$accountDetails[$depositAccount]['bank'] =  $this->bankDetails->bankName ?? 'HDFC Bank';
         }
         
 
