@@ -1,7 +1,11 @@
 <?php
 require_once(dirname(__DIR__)."/classes/banking.php"); 
 require_once(dirname(__DIR__)."/classes/messages.php"); 
-
+/**
+ * This Transfer class used to transfer ammount in given account number from given account.
+ * Here we are using two static array to store account data for multiple transfer 
+ * we need to use valid account number, amount, account type ect. 
+*/
 class Transfer extends Messages
 {
     
@@ -14,6 +18,11 @@ class Transfer extends Messages
         $this->bankDetails = new Banking();
         $this->msg = new Messages();
     }
+
+    /**
+     * In this function we do the data validation
+     * In this function we passed account details array 
+    */
     private function accountValidation($accountDetails)
     {
         $errorMsg='';
@@ -31,6 +40,11 @@ class Transfer extends Messages
         return $errorMsg;
     }
 
+    /**
+     * TransferAmount function we passed two static array that will hold the value for next transaction
+     * This fuction used to transfer amount from one account number to another account number
+     * In one account, we will widhdraw ammount and same ammount we will deposit in given account
+    */
     public function transferAmount($withdrawAccount, $depositAccount)
     {
         if($this->accountValidation($withdrawAccount)!='')

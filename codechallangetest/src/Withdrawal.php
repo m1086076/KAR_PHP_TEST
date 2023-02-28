@@ -1,7 +1,11 @@
 <?php
 require_once(dirname(__DIR__)."/classes/banking.php");  
 require_once(dirname(__DIR__)."/classes/messages.php"); 
-
+/**
+ * This Withdrawal class used to Withdraw ammount in given account number.
+ * Here we are using one static array to store account data for multiple Withdrawal 
+ * we need to use valid account number, amount, account type ect. 
+*/
 class Withdrawal extends Messages
 {
     private static $accountDetails = array();
@@ -12,6 +16,10 @@ class Withdrawal extends Messages
         $this->msg = new Messages();
     }
 
+     /**
+     * withdrawAmount function we used one static array that will hold the value for next transaction
+     * This fuction used to withdraw amount from given account number
+    */
     public function withdrawAmount($withdrawalAccount, $accountHolderName,$accountBalance,$withdrawAmount, $accountType, $investmentAccType="NO")
     {
        
@@ -36,7 +44,9 @@ class Withdrawal extends Messages
             return $this->msg->showMessage("IndivisualAccLimit"); 
         }
         
-        
+        /**
+         * Here we store the account details  in accountDetails array
+        */
         if(!array_key_exists($withdrawalAccount, self::$accountDetails) && !empty($withdrawalAccount)){
             self::$accountDetails[$withdrawalAccount]['accountHolderName'] = $accountHolderName ?? null;
             self::$accountDetails[$withdrawalAccount]['balance'] = $accountBalance ?? 1000 ;
