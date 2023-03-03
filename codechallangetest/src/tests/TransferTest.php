@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-require_once(dirname(__DIR__)."/Transfer.php"); 
+require_once(dirname(dirname(__DIR__))."./classes/Banking.php"); 
 
 class TransferTest extends TestCase
 {
@@ -9,7 +9,7 @@ class TransferTest extends TestCase
      */
     public function testTransferAmountValid() 
     {
-        $transfer = new Transfer();
+        $transfer = new Banking();
         $transfer->sender = new Account();
         $transfer->receiver = new Account();
 
@@ -22,7 +22,7 @@ class TransferTest extends TestCase
         $transfer->sender->setInvestmentAccountType($withdrawAccount[6086000100057337]['investmentAccountType']);
         $transfer->sender->setAccountBalance($withdrawAccount[6086000100057337]['balance']);
         $transfer->sender->setTransferAmmount($withdrawAccount[6086000100057337]['transferAmt']);
-        $transfer->sender->setBankName($transfer->bank->bankName);
+        $transfer->sender->setBankName($transfer->bankName);
 
         $this->assertEquals('6086000100057337',$transfer->sender->getAccountNumber());
         $this->assertEquals("Nafees",$transfer->sender->getAccountHolderName());
@@ -37,7 +37,7 @@ class TransferTest extends TestCase
         $transfer->receiver->setAccountType($depositAccount[6086000100057338]['accountType']);
         $transfer->receiver->setInvestmentAccountType($depositAccount[6086000100057338]['investmentAccountType']);
         $transfer->receiver->setAccountBalance($depositAccount[6086000100057338]['balance']);
-        $transfer->receiver->setBankName($transfer->bank->bankName);
+        $transfer->receiver->setBankName($transfer->bankName);
 
         $this->assertEquals('6086000100057338',$transfer->receiver->getAccountNumber());
         $this->assertEquals("Muhammad Nafees",$transfer->receiver->getAccountHolderName());
@@ -46,7 +46,7 @@ class TransferTest extends TestCase
         $this->assertEquals(100,$transfer->receiver->getAccountBalance());
         $this->assertEquals("HDFC Bank",$transfer->receiver->getBankName());
        
-        $result = $transfer->transferAmount($withdrawAccount,$depositAccount);
+        $result = $transfer->transfer($withdrawAccount,$depositAccount);
 
         $res_sender = json_decode($result['postTransfer_senderAccount'],true);
         $res_receiver = json_decode($result['postTransfer_receiverAccount'],true);
@@ -60,7 +60,7 @@ class TransferTest extends TestCase
      */
     public function testTransferAmountInValid() 
     {
-        $transfer = new Transfer();
+        $transfer = new Banking();
         $transfer->sender = new Account();
         $transfer->receiver = new Account();
 
@@ -73,7 +73,7 @@ class TransferTest extends TestCase
         $transfer->sender->setInvestmentAccountType($withdrawAccount[6086000100057338]['investmentAccountType']);
         $transfer->sender->setAccountBalance($withdrawAccount[6086000100057338]['balance']);
         $transfer->sender->setTransferAmmount($withdrawAccount[6086000100057338]['transferAmt']);
-        $transfer->sender->setBankName($transfer->bank->bankName);
+        $transfer->sender->setBankName($transfer->bankName);
 
         $this->assertEquals('6086000100057338',$transfer->sender->getAccountNumber());
         $this->assertEquals("Nafees",$transfer->sender->getAccountHolderName());
@@ -88,7 +88,7 @@ class TransferTest extends TestCase
         $transfer->receiver->setAccountType($depositAccount[6086000100057338]['accountType']);
         $transfer->receiver->setInvestmentAccountType($depositAccount[6086000100057338]['investmentAccountType']);
         $transfer->receiver->setAccountBalance($depositAccount[6086000100057338]['balance']);
-        $transfer->receiver->setBankName($transfer->bank->bankName);
+        $transfer->receiver->setBankName($transfer->bankName);
 
         $this->assertEquals('6086000100057338',$transfer->receiver->getAccountNumber());
         $this->assertEquals("Muhammad Nafees",$transfer->receiver->getAccountHolderName());
@@ -97,9 +97,8 @@ class TransferTest extends TestCase
         $this->assertEquals(100,$transfer->receiver->getAccountBalance());
         $this->assertEquals("HDFC Bank",$transfer->receiver->getBankName());
        
-        $result = $transfer->transferAmount($withdrawAccount,$depositAccount);
+        $result = $transfer->transfer($withdrawAccount,$depositAccount);
        
-        $result = $transfer->transferAmount($withdrawAccount,$depositAccount);
         $this->assertEquals($transfer->msg->showMessage("TransferActInvalid"),$result);
     }
     
@@ -108,7 +107,7 @@ class TransferTest extends TestCase
      */
     public function testTransferAmountInValidAmt() 
     {
-        $transfer = new Transfer();
+        $transfer = new Banking();
         $transfer->sender = new Account();
         $transfer->receiver = new Account();
 
@@ -121,7 +120,7 @@ class TransferTest extends TestCase
         $transfer->sender->setInvestmentAccountType($withdrawAccount[6086000100057337]['investmentAccountType']);
         $transfer->sender->setAccountBalance($withdrawAccount[6086000100057337]['balance']);
         $transfer->sender->setTransferAmmount($withdrawAccount[6086000100057337]['transferAmt']);
-        $transfer->sender->setBankName($transfer->bank->bankName);
+        $transfer->sender->setBankName($transfer->bankName);
 
         $this->assertEquals('6086000100057337',$transfer->sender->getAccountNumber());
         $this->assertEquals("Nafees",$transfer->sender->getAccountHolderName());
@@ -136,7 +135,7 @@ class TransferTest extends TestCase
         $transfer->receiver->setAccountType($depositAccount[6086000100057338]['accountType']);
         $transfer->receiver->setInvestmentAccountType($depositAccount[6086000100057338]['investmentAccountType']);
         $transfer->receiver->setAccountBalance($depositAccount[6086000100057338]['balance']);
-        $transfer->receiver->setBankName($transfer->bank->bankName);
+        $transfer->receiver->setBankName($transfer->bankName);
 
         $this->assertEquals('6086000100057338',$transfer->receiver->getAccountNumber());
         $this->assertEquals("Muhammad Nafees",$transfer->receiver->getAccountHolderName());
@@ -145,7 +144,7 @@ class TransferTest extends TestCase
         $this->assertEquals(100,$transfer->receiver->getAccountBalance());
         $this->assertEquals("HDFC Bank",$transfer->receiver->getBankName());
        
-        $result = $transfer->transferAmount($withdrawAccount,$depositAccount);
+        $result = $transfer->transfer($withdrawAccount,$depositAccount);
         $this->assertEquals($transfer->msg->showMessage("InvalidAMT"),$result);
     }
 
@@ -154,7 +153,7 @@ class TransferTest extends TestCase
      */
     public function testTransferAmountMoreThanBalance() 
     {
-        $transfer = new Transfer();
+        $transfer = new Banking();
         $transfer->sender = new Account();
         $transfer->receiver = new Account();
 
@@ -167,7 +166,7 @@ class TransferTest extends TestCase
         $transfer->sender->setInvestmentAccountType($withdrawAccount[6086000100057337]['investmentAccountType']);
         $transfer->sender->setAccountBalance($withdrawAccount[6086000100057337]['balance']);
         $transfer->sender->setTransferAmmount($withdrawAccount[6086000100057337]['transferAmt']);
-        $transfer->sender->setBankName($transfer->bank->bankName);
+        $transfer->sender->setBankName($transfer->bankName);
 
         $this->assertEquals('6086000100057337',$transfer->sender->getAccountNumber());
         $this->assertEquals("Nafees",$transfer->sender->getAccountHolderName());
@@ -182,7 +181,7 @@ class TransferTest extends TestCase
         $transfer->receiver->setAccountType($depositAccount[6086000100057338]['accountType']);
         $transfer->receiver->setInvestmentAccountType($depositAccount[6086000100057338]['investmentAccountType']);
         $transfer->receiver->setAccountBalance($depositAccount[6086000100057338]['balance']);
-        $transfer->receiver->setBankName($transfer->bank->bankName);
+        $transfer->receiver->setBankName($transfer->bankName);
 
         $this->assertEquals('6086000100057338',$transfer->receiver->getAccountNumber());
         $this->assertEquals("Muhammad Nafees",$transfer->receiver->getAccountHolderName());
@@ -191,7 +190,7 @@ class TransferTest extends TestCase
         $this->assertEquals(100,$transfer->receiver->getAccountBalance());
         $this->assertEquals("HDFC Bank",$transfer->receiver->getBankName());
        
-        $result = $transfer->transferAmount($withdrawAccount,$depositAccount);
+        $result = $transfer->transfer($withdrawAccount,$depositAccount);
         $this->assertEquals($transfer->msg->showMessage("insufficientFund"),$result);
     }
    
