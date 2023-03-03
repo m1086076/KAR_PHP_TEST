@@ -1,5 +1,6 @@
 <?php
 require_once(dirname(__DIR__)."/classes/banking.php"); 
+require_once(dirname(__DIR__)."/classes/Account.php"); 
 require_once(dirname(__DIR__)."/classes/messages.php"); 
 /**
  * This Transfer class used to transfer ammount in given account number from given account.
@@ -7,15 +8,12 @@ require_once(dirname(__DIR__)."/classes/messages.php");
  * we need to use valid account number, amount, account type ect. 
 */
 class Transfer extends Messages
-{
-    
-    private static $withdrawAccountDetails = array();
-    private static $depositAccountDetails = array();
-    
-    
+{   
     function __construct()
     {
-        $this->bankDetails = new Banking();
+        $this->bank = new Banking();
+        $this->sender = new Account();
+        $this->receiver = new Account();
         $this->msg = new Messages();
     }
 
@@ -28,12 +26,12 @@ class Transfer extends Messages
         $errorMsg='';
         foreach($accountDetails as $accountNo=>$accountDetails)
         {
-            if(empty($accountNo) || empty($accountDetails['accountHolderName']) || ($accountDetails['accountType']!=$this->bankDetails->account_type_rev 
-            && $accountDetails['accountType']!=$this->bankDetails->account_type_invt)){
+            if(empty($accountNo) || empty($accountDetails['accountHolderName']) || ($accountDetails['accountType']!=$this->bank->account_type_rev 
+            && $accountDetails['accountType']!=$this->bank->account_type_invt)){
                 return $errorMsg=$this->msg->showMessage("InvalidAccount"); 
             }
-            if($accountDetails['accountType']==$this->bankDetails->account_type_invt && ($this->bankDetails->account_type_indv!=$accountDetails['investmentAccountType'] 
-            && $this->bankDetails->account_type_corp!=$accountDetails['investmentAccountType'])){
+            if($accountDetails['accountType']==$this->bank->account_type_invt && ($this->bank->account_type_indv!=$accountDetails['investmentAccountType'] 
+            && $this->bank->account_type_corp!=$accountDetails['investmentAccountType'])){
                 return $errorMsg=$this->msg->showMessage("InvalidAccTypeInv"); 
             }
         }
@@ -69,31 +67,38 @@ class Transfer extends Messages
             return $errorMsg=$this->msg->showMessage("insufficientFund"); 
         }
 
-        if(!array_key_exists($withdrawActNo, self::$withdrawAccountDetails) && !empty($withdrawActNo)){
-            self::$withdrawAccountDetails[$withdrawActNo]['balance'] = $withdrawAccount[$withdrawActNo]['balance'];
-            self::$withdrawAccountDetails[$withdrawActNo]['accountHolderName'] = $withdrawAccount[$withdrawActNo]['accountHolderName'];
-            self::$withdrawAccountDetails[$withdrawActNo]['accountType'] = $withdrawAccount[$withdrawActNo]['accountType'];;
-            self::$withdrawAccountDetails[$withdrawActNo]['investmentAccountType'] = $withdrawAccount[$withdrawActNo]['investmentAccountType'];
-            self::$withdrawAccountDetails[$withdrawActNo]['bank'] =  $this->bankDetails->bankName ?? 'HDFC Bank';
+        if(!empty($withdrawActNo)){
+            $this->sender->setAccountNumber($withdrawActNo);
+            $this->sender->setaccountHolderName($withdrawAccount[$withdrawActNo]['accountHolderName']);
+            $this->sender->setAccountType($withdrawAccount[$withdrawActNo]['accountType']);
+            $this->sender->setInvestmentAccountType($withdrawAccount[$withdrawActNo]['investmentAccountType']);
+            $this->sender->setAccountBalance($withdrawAccount[$withdrawActNo]['balance']);
+            $this->sender->setTransferAmmount($withdrawAccount[$withdrawActNo]['transferAmt']);
+            $this->sender->setBankName($this->bank->bankName);
         }
 
-        if(!array_key_exists($depositActNo, self::$depositAccountDetails) && !empty($depositActNo)){
-            self::$depositAccountDetails[$depositActNo]['balance'] = $depositAccount[$depositActNo]['balance'];
-            self::$depositAccountDetails[$depositActNo]['accountHolderName'] = $depositAccount[$depositActNo]['accountHolderName'];
-            self::$depositAccountDetails[$depositActNo]['accountType'] = $depositAccount[$depositActNo]['accountType'];;
-            self::$depositAccountDetails[$depositActNo]['investmentAccountType'] = $depositAccount[$depositActNo]['investmentAccountType'];
-            self::$depositAccountDetails[$depositActNo]['bank'] =  $this->bankDetails->bankName ?? 'HDFC Bank';
+        if(!empty($depositActNo)){
+            $this->receiver->setAccountNumber($depositActNo);
+            $this->receiver->setaccountHolderName($depositAccount[$depositActNo]['accountHolderName']);
+            $this->receiver->setAccountType($depositAccount[$depositActNo]['accountType']);
+            $this->receiver->setInvestmentAccountType($depositAccount[$depositActNo]['investmentAccountType']);
+            $this->receiver->setAccountBalance($depositAccount[$depositActNo]['balance']);
+            $this->receiver->setBankName($this->bank->bankName);
         }
-        
+        $data['preTransfer_senderAccount'] = json_encode($this->sender);
+        $data['preTransfer_receiverAccount'] = json_encode($this->receiver);
 
         
-        if(self::$withdrawAccountDetails[$withdrawActNo]['balance']>$withdrawAccount[$withdrawActNo]['transferAmt']){
-            if((self::$withdrawAccountDetails[$withdrawActNo]['balance'] -= $withdrawAccount[$withdrawActNo]['transferAmt']) && (self::$depositAccountDetails[$depositActNo]['balance']+=$withdrawAccount[$withdrawActNo]['transferAmt'])){
-                return $this->msg->showMessage("success");
-            }
-            else {
-                return $this->msg->showMessage("failled");
-            }
+        if($this->sender->getAccountBalance()>=$this->sender->getTransferAmmount())
+        {
+            $this->sender->setAccountBalance($this->sender->getAccountBalance()-$this->sender->getTransferAmmount());
+            $this->receiver->setAccountBalance($this->receiver->getAccountBalance()+$this->sender->getTransferAmmount());
+
+            $data['postTransfer_senderAccount'] = json_encode($this->sender);
+            $data['postTransfer_receiverAccount'] = json_encode($this->receiver);
+
+            return $data;
+            
         }
         else{
             return $errorMsg=$this->msg->showMessage("insufficientFund"); 
@@ -101,3 +106,11 @@ class Transfer extends Messages
     }
     
 }
+/*
+$obj = new Transfer();
+$withdrawAccount[123] = array("accountHolderName"=>"Nafees","accountType"=>"INVESTMENT","investmentAccountType"=>"INDIVISUAL","balance"=>"500","transferAmt"=>"200");
+$depositAccount[1234] = array("accountHolderName"=>"Nafees","accountType"=>"INVESTMENT","investmentAccountType"=>"INDIVISUAL","balance"=>"500");
+$res = $obj->transferAmount($withdrawAccount, $depositAccount);
+
+print_r($res);*/
+

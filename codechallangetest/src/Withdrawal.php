@@ -1,5 +1,6 @@
 <?php
-require_once(dirname(__DIR__)."/classes/banking.php");  
+require_once(dirname(__DIR__)."/classes/banking.php"); 
+require_once(dirname(__DIR__)."/classes/Account.php");  
 require_once(dirname(__DIR__)."/classes/messages.php"); 
 /**
  * This Withdrawal class used to Withdraw ammount in given account number.
@@ -7,22 +8,21 @@ require_once(dirname(__DIR__)."/classes/messages.php");
  * we need to use valid account number, amount, account type ect. 
 */
 class Withdrawal extends Messages
-{
-    private static $accountDetails = array();
-    
+{   
     function __construct()
     {
         $this->bankDetails = new Banking();
+        $this->account = new Account();
         $this->msg = new Messages();
     }
 
-     /**
-     * withdrawAmount function we used one static array that will hold the value for next transaction
-     * This fuction used to withdraw amount from given account number
+    /**
+     * In this function we do the data validation
+     * In this function we passed account details array 
     */
-    public function withdrawAmount($withdrawalAccount, $accountHolderName,$accountBalance,$withdrawAmount, $accountType, $investmentAccType="NO")
+    private function accountValidation($withdrawalAccount, $accountHolderName,$accountBalance,$withdrawAmount, $accountType, $investmentAccType)
     {
-       
+        $errorMsg='';
         if(empty($withdrawalAccount) || empty($accountHolderName) || ($accountType!=$this->bankDetails->account_type_rev 
         && $accountType!=$this->bankDetails->account_type_invt)){
             return $this->msg->showMessage("InvalidAccount"); 
@@ -43,25 +43,47 @@ class Withdrawal extends Messages
         if($investmentAccType==$this->bankDetails->account_type_indv &&  $withdrawAmount>$this->bankDetails->withdrawalLimit){
             return $this->msg->showMessage("IndivisualAccLimit"); 
         }
-        
-        /**
-         * Here we store the account details  in accountDetails array
-        */
-        if(!array_key_exists($withdrawalAccount, self::$accountDetails) && !empty($withdrawalAccount)){
-            self::$accountDetails[$withdrawalAccount]['accountHolderName'] = $accountHolderName ?? null;
-            self::$accountDetails[$withdrawalAccount]['balance'] = $accountBalance ?? 1000 ;
-            self::$accountDetails[$withdrawalAccount]['accountType'] = $accountType;
-            self::$accountDetails[$withdrawalAccount]['investmentAccountType'] = $investmentAccType;
-            self::$accountDetails[$withdrawalAccount]['bank'] =  $this->bankDetails->bankName ?? 'HDFC Bank';
-        }
-        if(self::$accountDetails[$withdrawalAccount]['balance']<$withdrawAmount){
-            return $this->msg->showMessage("insufficientFund"); 
-        }
-        if(isset(self::$accountDetails[$withdrawalAccount]['balance']) && !empty($withdrawalAccount) &&  self::$accountDetails[$withdrawalAccount]['balance']-=$withdrawAmount){
-            return $this->msg->showMessage("success");
+        return $errorMsg;
+    }
+
+     /**
+     * withdrawAmount function we used one static array that will hold the value for next transaction
+     * This fuction used to withdraw amount from given account number
+    */
+    public function withdrawAmount($withdrawalAccount, $accountHolderName,$accountBalance,$withdrawAmount, $accountType, $investmentAccType="NO")
+    {  
+        $errorMsg = $this->accountValidation($withdrawalAccount, $accountHolderName,$accountBalance,$withdrawAmount, $accountType, $investmentAccType);
+        if($errorMsg!=''){
+            return $errorMsg;
         }
         else{
-            return $this->msg->showMessage("failled");
+            /**
+            * save account details in account object
+            */
+            $this->account->setAccountNumber($withdrawalAccount);
+            $this->account->setaccountHolderName($accountHolderName);
+            $this->account->setAccountType($accountType);
+            $this->account->setInvestmentAccountType($investmentAccType);
+            $this->account->setAccountBalance($accountBalance);
+            $this->account->setBankName($this->bankDetails->bankName);
+
+            $data['preWithdrawal'] = json_encode($this->account);
+
+            if($this->account->getAccountBalance()<$withdrawAmount){
+                return $this->msg->showMessage("insufficientFund"); 
+            }
+            /**
+             * Withdrawal ammount from account object 
+            */
+            if($this->account->getAccountBalance()>0 && !empty($withdrawalAccount)){
+                $this->account->setAccountBalance($this->account->getAccountBalance()-$withdrawAmount);
+                $data['postWithdrawal'] = json_encode($this->account);
+
+                return $data;
+            }
+            else{
+                return $this->msg->showMessage("failled");
+            }
         }
-    }
+   }
 }

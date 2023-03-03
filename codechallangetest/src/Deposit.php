@@ -1,5 +1,6 @@
 <?php
 require_once(dirname(__DIR__)."/classes/banking.php"); 
+require_once(dirname(__DIR__)."/classes/Account.php"); 
 require_once(dirname(__DIR__)."/classes/messages.php"); 
 /**
  * This Deposit class used to deposit ammount in given account number
@@ -8,11 +9,10 @@ require_once(dirname(__DIR__)."/classes/messages.php");
 */
 class Deposit extends Messages
 {   
-    private static $accountDetails = array();
-    
     function __construct()
     {
-        $this->bankDetails = new Banking();
+        $this->account = new Account();
+        $this->bank = new Banking();
         $this->msg = new Messages();
     }
 
@@ -20,14 +20,14 @@ class Deposit extends Messages
      * depositAmount function used to deposit amount in given account number
      *  
     */
-    public function depositAmount($depositAccount, $accountHolderName, $depositAmount, $accountType, $investmentAccType="NO")
+    public function depositAmount($depositAccount, $accountHolderName, $depositAmount, $accountType, $investmentAccType="NO",$balance=0)
     {  
-        if(empty($depositAccount) || empty($accountHolderName) || ($accountType!=$this->bankDetails->account_type_rev 
-        && $accountType!=$this->bankDetails->account_type_invt)){
+        if(empty($depositAccount) || empty($accountHolderName) || ($accountType!=$this->bank->account_type_rev 
+        && $accountType!=$this->bank->account_type_invt)){
             return $this->msg->showMessage("InvalidAccount"); 
         }
-        if($accountType==$this->bankDetails->account_type_invt && ($this->account_type_indv!=$investmentAccType 
-        && $this->bankDetails->account_type_corp!=$investmentAccType)){
+        if($accountType==$this->bank->account_type_invt && ($this->bank->account_type_indv!=$investmentAccType 
+        && $this->bank->account_type_corp!=$investmentAccType)){
             return $this->msg->showMessage("InvalidAccTypeInv"); 
         }
         if(!is_numeric($depositAmount) || $depositAmount <= 0){
@@ -35,23 +35,29 @@ class Deposit extends Messages
         }
 
         /**
-         * Check the value and hold it in $accountDetails array for next deposit  
+         * save account details in account object
         */
-        if(!array_key_exists($depositAccount, self::$accountDetails) && !empty($depositAccount)){
-            self::$accountDetails[$depositAccount]['accountHolderName'] = $accountHolderName ?? null;
-            self::$accountDetails[$depositAccount]['balance'] = 0 ;
-            self::$accountDetails[$depositAccount]['accountType'] = $accountType;
-            self::$accountDetails[$depositAccount]['investmentAccountType'] = $investmentAccType;
-            self::$accountDetails[$depositAccount]['bank'] =  $this->bankDetails->bankName ?? 'HDFC Bank';
-        }
-        if(isset(self::$accountDetails[$depositAccount]['balance']) && !empty($depositAccount) && self::$accountDetails[$depositAccount]['balance']+=$depositAmount){
-            return $this->msg->showMessage("success");
+        $this->account->setAccountNumber($depositAccount);
+        $this->account->setaccountHolderName($accountHolderName);
+        $this->account->setAccountType($accountType);
+        $this->account->setInvestmentAccountType($investmentAccType);
+        $this->account->setAccountBalance($balance);
+        $this->account->setBankName($this->bank->bankName);
+
+        $data['preDeposit'] = json_encode($this->account);
+        if($depositAmount > 0){
+            /**
+            * diposit ammount in account object
+            */
+            $this->account->setAccountBalance($this->account->getAccountBalance()+$depositAmount);
+            $data['postDeposit'] = json_encode($this->account);
+
+            return $data; 
         }
         else{
             return $this->msg->showMessage("failled");
         }
-        return self::$accountDetails;
-       
     }
     
 }
+
