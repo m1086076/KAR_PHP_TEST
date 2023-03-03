@@ -10,14 +10,26 @@ class DepositTest extends TestCase
     public function testDepositAmountValid() 
     {
        $deposit = new Deposit();
-       $this->assertIsInt(6086000100057336);
-       $this->assertIsstring("Nafees");
-       $this->assertIsInt(500);
-       $this->assertIsstring("REVIEWING");
-       $this->assertIsstring("NO");
+       $deposit->account->setAccountNumber(6086000100057336);
+       $deposit->account->setAccountHolderName("Nafees");
+       $deposit->account->setAccountType("REVIEWING");
+       $deposit->account->setInvestmentAccountType("NO");
+       $deposit->account->setAccountBalance(500);
+       $deposit->account->setBankName($deposit->bank->bankName);
 
-       $result = $deposit->depositAmount(6086000100057336, "Nafees", 500, "REVIEWING", "NO");
-       $this->assertEquals($deposit->msg->showMessage("success"),$result);
+       $this->assertEquals(6086000100057336,$deposit->account->getAccountNumber());
+       $this->assertEquals("Nafees",$deposit->account->getAccountHolderName());
+       $this->assertEquals("REVIEWING",$deposit->account->getAccountType());
+       $this->assertEquals("NO",$deposit->account->getInvestmentAccountType());
+       $this->assertEquals(500,$deposit->account->getAccountBalance());
+       $this->assertEquals("HDFC Bank",$deposit->account->getBankName());
+       $this->assertIsInt(300);//Deposit Ammount
+
+       $result = $deposit->depositAmount($deposit->account->getAccountNumber(), $deposit->account->getAccountHolderName(), 300, $deposit->account->getAccountType(), $deposit->account->getInvestmentAccountType(),$deposit->account->getAccountBalance());
+
+       $res_array = json_decode($result['postDeposit'],true);
+
+       $this->assertEquals(800,$res_array['accountBalance']);
     }
 
     /**
@@ -25,14 +37,24 @@ class DepositTest extends TestCase
      */
     public function testDepositAmountInValid() 
     {
-       $deposit = new Deposit();
-       $this->assertIsInt(6086000100057336);
-       $this->assertIsstring("Nafees");
-       $this->assertIsInt(500);
-       $this->assertIsstring("REVIEWING");
-       $this->assertIsstring("NO");
-       
-       $result = $deposit->depositAmount('', "Nafees", 500, "REVIEWING", "NO");
+      $deposit = new Deposit();
+      $deposit->account->setAccountNumber('');
+      $deposit->account->setAccountHolderName("Nafees");
+      $deposit->account->setAccountType("REVIEWING");
+      $deposit->account->setInvestmentAccountType("NO");
+      $deposit->account->setAccountBalance(500);
+      $deposit->account->setBankName($deposit->bank->bankName);
+
+      $this->assertEquals('','');
+      $this->assertEquals("Nafees",$deposit->account->getAccountHolderName());
+      $this->assertEquals("REVIEWING",$deposit->account->getAccountType());
+      $this->assertEquals("NO",$deposit->account->getInvestmentAccountType());
+      $this->assertEquals(500,$deposit->account->getAccountBalance());
+      $this->assertEquals("HDFC Bank",$deposit->account->getBankName());
+      $this->assertIsInt(300);//Deposit Ammount
+
+      $result = $deposit->depositAmount('', $deposit->account->getAccountHolderName(), 300, $deposit->account->getAccountType(), $deposit->account->getInvestmentAccountType(),$deposit->account->getAccountBalance());
+
        $this->assertEquals($deposit->msg->showMessage("InvalidAccount"),$result);
     }
 
@@ -41,14 +63,24 @@ class DepositTest extends TestCase
      */
     public function testDepositAmountInValidAmt() 
     {
-       $deposit = new Deposit();
-       $this->assertIsInt(6086000100057336);
-       $this->assertIsstring("Nafees");
-       $this->assertIsInt(-100);
-       $this->assertIsstring("REVIEWING");
-       $this->assertIsstring("NO");
-       
-       $result = $deposit->depositAmount(6086000100057336, "Nafees", -100, "REVIEWING", "NO");
+      $deposit = new Deposit();
+      $deposit->account->setAccountNumber(6086000100057336);
+      $deposit->account->setAccountHolderName("Nafees");
+      $deposit->account->setAccountType("REVIEWING");
+      $deposit->account->setInvestmentAccountType("NO");
+      $deposit->account->setAccountBalance(500);
+      $deposit->account->setBankName($deposit->bank->bankName);
+
+      $this->assertEquals('6086000100057336',$deposit->account->getAccountNumber());
+      $this->assertEquals("Nafees",$deposit->account->getAccountHolderName());
+      $this->assertEquals("REVIEWING",$deposit->account->getAccountType());
+      $this->assertEquals("NO",$deposit->account->getInvestmentAccountType());
+      $this->assertEquals(500,$deposit->account->getAccountBalance());
+      $this->assertEquals("HDFC Bank",$deposit->account->getBankName());
+      $this->assertIsInt(-300);//Deposit Ammount
+
+      $result = $deposit->depositAmount($deposit->account->getAccountNumber(), $deposit->account->getAccountHolderName(), -300, $deposit->account->getAccountType(), $deposit->account->getInvestmentAccountType(),$deposit->account->getAccountBalance());
+
        $this->assertEquals($deposit->msg->showMessage("InvalidAMT"),$result);
     }
    

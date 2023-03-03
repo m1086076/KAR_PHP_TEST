@@ -10,15 +10,27 @@ class WithdrawalTest extends TestCase
     public function testDepositAmountValid() 
     {
        $Withdrawal = new Withdrawal();
-       $this->assertIsInt(6086000100057336);
-       $this->assertIsstring("Nafees");
-       $this->assertIsInt(1000);
-       $this->assertIsInt(200);
-       $this->assertIsstring("REVIEWING");
-       $this->assertIsstring("NO");
+       $Withdrawal->account->setAccountNumber(6086000100057336);
+       $Withdrawal->account->setAccountHolderName("Nafees");
+       $Withdrawal->account->setAccountType("REVIEWING");
+       $Withdrawal->account->setInvestmentAccountType("NO");
+       $Withdrawal->account->setAccountBalance(1000);
+       $Withdrawal->account->setBankName($Withdrawal->bankDetails->bankName);
+ 
+       $this->assertEquals('6086000100057336',$Withdrawal->account->getAccountNumber());
+       $this->assertEquals("Nafees",$Withdrawal->account->getAccountHolderName());
+       $this->assertEquals("REVIEWING",$Withdrawal->account->getAccountType());
+       $this->assertEquals("NO",$Withdrawal->account->getInvestmentAccountType());
+       $this->assertEquals(1000,$Withdrawal->account->getAccountBalance());
+       $this->assertEquals("HDFC Bank",$Withdrawal->account->getBankName());
+       $this->assertIsInt(300);//withdraw Ammount
        
-       $result = $Withdrawal->withdrawAmount(6086000100057336, "Nafees",1000,200, "REVIEWING", "NO");
-       $this->assertEquals($Withdrawal->msg->showMessage("success"),$result);
+       $result = $Withdrawal->withdrawAmount($Withdrawal->account->getAccountNumber(), $Withdrawal->account->getAccountHolderName(),$Withdrawal->account->getAccountBalance(),300, $Withdrawal->account->getAccountType(), $Withdrawal->account->getInvestmentAccountType());
+
+       $res_array = json_decode($result['postWithdrawal'],true);
+
+       $this->assertEquals(700,$res_array['accountBalance']);
+       
     }
     
     /**
@@ -26,16 +38,25 @@ class WithdrawalTest extends TestCase
      */
     public function testwithdrawAmount() 
     {
-        $Withdrawal = new Withdrawal();
-        $this->assertIsInt(6086000100057336);
-        $this->assertIsstring("Nafees");
-        $this->assertIsInt(10000);
-        $this->assertIsInt(200);
-        $this->assertIsstring("REVIEWING");
-        $this->assertIsstring("NO");
+       $Withdrawal = new Withdrawal();
+       $Withdrawal->account->setAccountNumber('');
+       $Withdrawal->account->setAccountHolderName("Nafees");
+       $Withdrawal->account->setAccountType("REVIEWING");
+       $Withdrawal->account->setInvestmentAccountType("NO");
+       $Withdrawal->account->setAccountBalance(1000);
+       $Withdrawal->account->setBankName($Withdrawal->bankDetails->bankName);
+ 
+       $this->assertEquals('','');
+       $this->assertEquals("Nafees",$Withdrawal->account->getAccountHolderName());
+       $this->assertEquals("REVIEWING",$Withdrawal->account->getAccountType());
+       $this->assertEquals("NO",$Withdrawal->account->getInvestmentAccountType());
+       $this->assertEquals(1000,$Withdrawal->account->getAccountBalance());
+       $this->assertEquals("HDFC Bank",$Withdrawal->account->getBankName());
+       $this->assertIsInt(300);//withdraw Ammount
        
-        $result = $Withdrawal->withdrawAmount('', "Nafees",1000,200, "REVIEWING", "NO");
-        $this->assertEquals($Withdrawal->msg->showMessage("InvalidAccount"),$result);
+       $result = $Withdrawal->withdrawAmount('', $Withdrawal->account->getAccountHolderName(),$Withdrawal->account->getAccountBalance(),300, $Withdrawal->account->getAccountType(), $Withdrawal->account->getInvestmentAccountType());
+       
+       $this->assertEquals($Withdrawal->msg->showMessage("InvalidAccount"),$result); 
     }
 
     /**
@@ -44,14 +65,23 @@ class WithdrawalTest extends TestCase
     public function testDepositAmountInValidAmt() 
     {
         $Withdrawal = new Withdrawal();
-        $this->assertIsInt(6086000100057336);
-        $this->assertIsstring("Nafees");
-        $this->assertIsInt(1000);
-        $this->assertIsInt(1200);
-        $this->assertIsstring("REVIEWING");
-        $this->assertIsstring("NO");
+        $Withdrawal->account->setAccountNumber(6086000100057336);
+        $Withdrawal->account->setAccountHolderName("Nafees");
+        $Withdrawal->account->setAccountType("REVIEWING");
+        $Withdrawal->account->setInvestmentAccountType("NO");
+        $Withdrawal->account->setAccountBalance(1000);
+        $Withdrawal->account->setBankName($Withdrawal->bankDetails->bankName);
+  
+        $this->assertEquals('6086000100057336',$Withdrawal->account->getAccountNumber());
+        $this->assertEquals("Nafees",$Withdrawal->account->getAccountHolderName());
+        $this->assertEquals("REVIEWING",$Withdrawal->account->getAccountType());
+        $this->assertEquals("NO",$Withdrawal->account->getInvestmentAccountType());
+        $this->assertEquals(1000,$Withdrawal->account->getAccountBalance());
+        $this->assertEquals("HDFC Bank",$Withdrawal->account->getBankName());
+        $this->assertIsInt(1300);//withdraw Ammount
+        
+        $result = $Withdrawal->withdrawAmount($Withdrawal->account->getAccountNumber(), $Withdrawal->account->getAccountHolderName(),$Withdrawal->account->getAccountBalance(),1300, $Withdrawal->account->getAccountType(), $Withdrawal->account->getInvestmentAccountType());
        
-        $result = $Withdrawal->withdrawAmount(6086000100057336, "Nafees",1000,1200, "REVIEWING", "NO");
         $this->assertEquals($Withdrawal->msg->showMessage("insufficientFund"),$result);
     }
 
@@ -61,15 +91,24 @@ class WithdrawalTest extends TestCase
     public function testDepositAmountFromInvestmentIndivisualAcc() 
     {
 
-        $Withdrawal = new Withdrawal();
-        $this->assertIsInt(6086000100057336);
-        $this->assertIsstring("Muhammad Nafees");
-        $this->assertIsInt(1000);
-        $this->assertIsInt(600);
-        $this->assertIsstring("INVESTMENT");
-        $this->assertIsstring("NO");
+       $Withdrawal = new Withdrawal();
+       $Withdrawal->account->setAccountNumber(6086000100057336);
+       $Withdrawal->account->setAccountHolderName("Nafees");
+       $Withdrawal->account->setAccountType("INVESTMENT");
+       $Withdrawal->account->setInvestmentAccountType("INDIVISUAL");
+       $Withdrawal->account->setAccountBalance(1000);
+       $Withdrawal->account->setBankName($Withdrawal->bankDetails->bankName);
+ 
+       $this->assertEquals('6086000100057336',$Withdrawal->account->getAccountNumber());
+       $this->assertEquals("Nafees",$Withdrawal->account->getAccountHolderName());
+       $this->assertEquals("INVESTMENT",$Withdrawal->account->getAccountType());
+       $this->assertEquals("INDIVISUAL",$Withdrawal->account->getInvestmentAccountType());
+       $this->assertEquals(1000,$Withdrawal->account->getAccountBalance());
+       $this->assertEquals("HDFC Bank",$Withdrawal->account->getBankName());
+       $this->assertIsInt(600);//withdraw Ammount
        
-        $result = $Withdrawal->withdrawAmount(6086000100057336, "Nafees",1000,600, "INVESTMENT", "INDIVISUAL");
+       $result = $Withdrawal->withdrawAmount($Withdrawal->account->getAccountNumber(), $Withdrawal->account->getAccountHolderName(),$Withdrawal->account->getAccountBalance(),600, $Withdrawal->account->getAccountType(), $Withdrawal->account->getInvestmentAccountType());
+
         $this->assertEquals($Withdrawal->msg->showMessage("IndivisualAccLimit"),$result);
     }
    
