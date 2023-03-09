@@ -1,13 +1,14 @@
 <?php
-require_once(dirname(__DIR__)."/src/Deposit.php");
-require_once(dirname(__DIR__)."/src/Transfer.php");
-require_once(dirname(__DIR__)."/src/Withdrawal.php");
+require_once(dirname(__DIR__)."/classes/Banking.php");
 
 class apiURL
 {
+    function __construct()
+    {
+        $this->bank = new Banking();
+    }
     public function deposit($input)
     {
-        $deposit = new Deposit();
         if(!empty($input))
         {
             $depositAccount = $input['accountNumber'] ?? null;
@@ -17,14 +18,13 @@ class apiURL
             $investmentAccType = $input['investmentAccType'] ?? 'NO';
             $balance = $input['balance'] ?? null;
 
-            return $deposit->depositAmount($depositAccount, $accountHolderName, $depositAmount, $accountType, $investmentAccType,$balance);
+            return $this->bank->deposit($depositAccount, $accountHolderName, $depositAmount, $accountType, $investmentAccType,$balance);
         }
         
     }
 
     public function withdraw($input)
     {
-        $Withdrawal = new Withdrawal();
         if(!empty($input))
         {
             $withdrawalAccount = $input['accountNumber'] ?? null;
@@ -34,14 +34,13 @@ class apiURL
             $accountBalance = $input['balance'] ?? null;
             $withdrawAmount = $input['withdrawAmount'] ?? 0;
 
-            return $Withdrawal->withdrawAmount($withdrawalAccount, $accountHolderName,$accountBalance,$withdrawAmount, $accountType, $investmentAccType);
+            return $this->bank->withdraw($withdrawalAccount, $accountHolderName,$accountBalance,$withdrawAmount, $accountType, $investmentAccType);
         }
         
     }
 
     public function transfer($input)
     {
-        $transfer = new Transfer();
         if(!empty($input))
         {
             $snAccNo = $input['sender_accountNumber'] ?? null;
@@ -59,7 +58,7 @@ class apiURL
             $depositAccount[$rAccNo]['investmentAccountType'] = $input['receiver_investmentAccType'] ?? 'NO';
             $depositAccount[$rAccNo]['balance'] = $input['receiver_balance'] ?? null;
 
-            return $transfer->transferAmount($withdrawAccount, $depositAccount);
+            return $this->bank->transfer($withdrawAccount, $depositAccount);
         }
         
     }
